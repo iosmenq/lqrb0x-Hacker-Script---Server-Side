@@ -2,7 +2,8 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
-local targetName = "lqrb0x"
+local Debris = game:GetService("Debris")
+local targetName = "lqrb0x_bacon"
 local adminPlayer = nil
 local chaosEnabled = true
 
@@ -19,7 +20,7 @@ end
 local function protectAdmin()
     if not adminPlayer then return end
     
-    spawn(function()
+    coroutine.wrap(function()
         while adminPlayer and adminPlayer.Parent do
             if adminPlayer.Character then
                 local humanoid = adminPlayer.Character:FindFirstChildWhichIsA("Humanoid")
@@ -67,13 +68,13 @@ local function protectAdmin()
             end
             wait(0.5)
         end
-    end)
+    end)()
 end
 
 local function applyChaosToPlayer(player)
     if player == adminPlayer then return end
     
-    spawn(function()
+    coroutine.wrap(function()
         while player and player.Parent do
             if player.Character then
                 local char = player.Character
@@ -135,66 +136,76 @@ local function applyChaosToPlayer(player)
             end
             wait(0.1)
         end
-    end)
+    end)()
 end
 
 local function createExplosions()
-    while chaosEnabled do
-        if adminPlayer and adminPlayer.Character then
-            local adminHrp = adminPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if adminHrp then
-                for i = 1, 10 do
-                    local explosion = Instance.new("Explosion")
-                    explosion.Position = adminHrp.Position + Vector3.new(
-                        math.random(-20, 20),
-                        math.random(0, 10),
-                        math.random(-20, 20)
-                    )
-                    explosion.BlastRadius = 15
-                    explosion.Parent = Workspace
+    coroutine.wrap(function()
+        while chaosEnabled do
+            if adminPlayer and adminPlayer.Character then
+                local adminHrp = adminPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if adminHrp then
+                    for i = 1, 10 do
+                        local explosion = Instance.new("Explosion")
+                        explosion.Position = adminHrp.Position + Vector3.new(
+                            math.random(-20, 20),
+                            math.random(0, 10),
+                            math.random(-20, 20)
+                        )
+                        explosion.BlastRadius = 15
+                        explosion.Parent = Workspace
+                        Debris:AddItem(explosion, 1)
+                    end
                 end
             end
+            wait(0.3)
         end
-        wait(0.3)
-    end
+    end)()
 end
 
 local function changeSkybox()
     local skyboxIds = {264909758, 5772456607, 2529729649}
     
-    while chaosEnabled do
-        local sky = Instance.new("Sky")
-        for _, face in ipairs({"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}) do
-            sky[face] = "rbxassetid://" .. skyboxIds[math.random(1, #skyboxIds)]
+    coroutine.wrap(function()
+        while chaosEnabled do
+            local sky = Instance.new("Sky")
+            for _, face in ipairs({"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}) do
+                sky[face] = "rbxassetid://" .. skyboxIds[math.random(1, #skyboxIds)]
+            end
+            sky.Parent = Lighting
+            wait(1)
+            if sky then sky:Destroy() end
         end
-        sky.Parent = Lighting
-        wait(1)
-        if sky then sky:Destroy() end
-    end
+    end)()
 end
 
 local function spamDecals()
-    while chaosEnabled do
-        for _, part in ipairs(Workspace:GetChildren()) do
-            if part:IsA("BasePart") and math.random(1, 5) == 1 then
-                local decal = Instance.new("Decal")
-                decal.Face = Enum.NormalId[{"Top", "Bottom", "Left", "Right", "Front", "Back"}[math.random(1, 6)]]
-                decal.Texture = "rbxassetid://" .. math.random(1000000, 9999999)
-                decal.Parent = part
-                game:GetService("Debris"):AddItem(decal, 2)
+    coroutine.wrap(function()
+        while chaosEnabled do
+            for _, part in ipairs(Workspace:GetChildren()) do
+                if part:IsA("BasePart") and math.random(1, 5) == 1 then
+                    local decal = Instance.new("Decal")
+                    local faces = {"Top", "Bottom", "Left", "Right", "Front", "Back"}
+                    decal.Face = Enum.NormalId[faces[math.random(1, 6)]]
+                    decal.Texture = "rbxassetid://" .. math.random(1000000, 9999999)
+                    decal.Parent = part
+                    Debris:AddItem(decal, 2)
+                end
             end
+            wait(0.2)
         end
-        wait(0.2)
-    end
+    end)()
 end
 
 local function crazyLighting()
-    while chaosEnabled do
-        Lighting.Ambient = Color3.new(math.random(), math.random(), math.random())
-        Lighting.Brightness = math.random(5, 15)
-        Lighting.FogColor = Color3.new(math.random(), math.random(), math.random())
-        wait(0.1)
-    end
+    coroutine.wrap(function()
+        while chaosEnabled do
+            Lighting.Ambient = Color3.new(math.random(), math.random(), math.random())
+            Lighting.Brightness = math.random(5, 15)
+            Lighting.FogColor = Color3.new(math.random(), math.random(), math.random())
+            wait(0.1)
+        end
+    end)()
 end
 
 local function screenEffects()
@@ -229,20 +240,22 @@ local function screenEffects()
 end
 
 local function chatSpam()
-    while chaosEnabled do
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= adminPlayer then
-                local gui = player:FindFirstChild("PlayerGui")
-                if gui then
-                    local message = Instance.new("Message")
-                    message.Text = "LQRB0X OWNS YOU"
-                    message.Parent = gui
-                    game:GetService("Debris"):AddItem(message, 1)
+    coroutine.wrap(function()
+        while chaosEnabled do
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= adminPlayer then
+                    local gui = player:FindFirstChild("PlayerGui")
+                    if gui then
+                        local message = Instance.new("Message")
+                        message.Text = "LQRB0X OWNS YOU"
+                        message.Parent = gui
+                        Debris:AddItem(message, 1)
+                    end
                 end
             end
+            wait(0.5)
         end
-        wait(0.5)
-    end
+    end)()
 end
 
 Players.PlayerAdded:Connect(function(player)
@@ -252,6 +265,12 @@ Players.PlayerAdded:Connect(function(player)
     else
         wait(1)
         applyChaosToPlayer(player)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if player == adminPlayer then
+        adminPlayer = nil
     end
 end)
 
@@ -266,15 +285,15 @@ end
 
 wait(2)
 
-spawn(createExplosions)
-spawn(changeSkybox)
-spawn(spamDecals)
-spawn(crazyLighting)
-spawn(screenEffects)
-spawn(chatSpam)
+createExplosions()
+changeSkybox()
+spamDecals()
+crazyLighting()
+screenEffects()
+chatSpam()
 
 print("CHAOS MODE ACTIVATED")
-print("Admin: lqrb0x (Protected)")
+print("Admin: lqrb0x_back (Protected)")
 print("Others: Chaos Applied")
 
 while true do
